@@ -10,16 +10,18 @@ public class PlayerController : MonoBehaviour
     public Transform cam;
 
     [field: Header("Movement Variables")]
-    public float acceleration = 10f;
-    public float deceleration = 15f;
-    public float maxSpeed = 6f;
-    public float turnSmoothTime = 0.1f;
+    public float acceleration = 200f;
+    public float deceleration = 150f;
+    public float maxSpeed = 20f;
+    public float turnSmoothTime = 2f;
+    public float gravityValue = -30f;
 
-
-    private InputAction move, Jump; //declare input actions
+    private InputAction move, jump; //declare input actions
     private Vector3 horizontalVelocity;
-    private float verticalVelocity = 0f;
+    private float jumpVelocity = 0f;
     private CharacterController controller;
+    private bool isGrounded;
+
 
     private void Awake()
     {
@@ -29,13 +31,15 @@ public class PlayerController : MonoBehaviour
     private void OnEnable()
     {
         move = InputSystem.Player.Move;
+        jump = InputSystem.Player.Jump;
         move.Enable();
+        jump.Enable();
     }
 
     private void OnDisable()
     {
-        move = InputSystem.Player.Jump;
         move.Disable();
+        jump.Disable(); 
     }
 
     void Start()
@@ -67,18 +71,16 @@ public class PlayerController : MonoBehaviour
         targetMoveDirection.Normalize();
 
         if (inputDirection.magnitude >= 0.1f)
+        {
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetMoveDirection * maxSpeed, acceleration * Time.deltaTime);
+        }
+
         else
+        {
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, deceleration * Time.deltaTime);
+        }
 
-        // Gravity
-        if (controller.isGrounded)
-            verticalVelocity = -2f; // Small downward force to stick to ground
-        else
-            verticalVelocity += Physics.gravity.y * Time.deltaTime;
-
-        Vector3 finalVelocity = horizontalVelocity + Vector3.up * verticalVelocity;
-
+        Vector3 finalVelocity = horizontalVelocity + Vector3.up * jumpVelocity;
         controller.Move(finalVelocity * Time.deltaTime);
 
         // Rotate player to face camera forward smoothly
@@ -87,15 +89,39 @@ public class PlayerController : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(camForward);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSmoothTime * 10f * Time.deltaTime);
         }
-    }
 
+        //Jump Code
+        isGrounded = IsGrounded();
+        if (jump.triggered && isGrounded)
+        {           
+            jumpVelocity = 10f;
+        }
+        else
+        {
+            jumpVelocity += gravityValue * Time.deltaTime;
+        }
+    }
 
 
     // Work in progress
     public bool IsGrounded()
     {
-        float rayLength = controller.radius + 0.1f;
-        return Physics.Raycast(transform.position + controller.center, Vector3.down, rayLength, LayerMask.GetMask("Ground"));
+        LayerMask layerMask = LayerMask.GetMask("Ground");
+        float rayLength = controller.radius + 1.0f;
+        // Does the ray intersect any objects excluding the player layer
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), rayLength, layerMask))
+
+        {
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * rayLength, Color.green);
+            Debug.Log("is grounded");
+            return true;
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * rayLength, Color.white);
+            Debug.Log("not grounded");
+            return false;
+        }
     }
 
     public Vector3 GetVelocity()

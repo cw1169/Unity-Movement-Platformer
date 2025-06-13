@@ -816,9 +816,9 @@ GameObject:
   - component: {fileID: 777218956}
   - component: {fileID: 777218955}
   - component: {fileID: 777218954}
-  m_Layer: 0
-  m_Name: Plane
-  m_TagString: Untagged
+  m_Layer: 7
+  m_Name: Ground
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1334,6 +1334,8 @@ MonoBehaviour:
   deceleration: 150
   maxSpeed: 20
   turnSmoothTime: 2
+  gravityValue: -9.81
+  jumpSpeed: 0
 --- !u!114 &1802140292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1461,6 +1463,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 330585546}
+  - {fileID: 772749985}
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 1802140290}
@@ -1468,4 +1471,3 @@ SceneRoots:
   - {fileID: 1032586722}
   - {fileID: 1853389394}
   - {fileID: 393892059}
-  - {fileID: 772749985}
