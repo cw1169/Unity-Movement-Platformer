@@ -6,11 +6,8 @@ public class VelocityDisplay : MonoBehaviour
     public Vector3 velocity;
 
     void Update()
-    {
-        if (playerController != null)
-        {
-            velocity = playerController.GetVelocity();
-        }
+    {  
+        velocity = playerController.GetVelocity();
     }
 
     void OnGUI()

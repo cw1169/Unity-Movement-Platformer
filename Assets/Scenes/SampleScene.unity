@@ -1330,10 +1330,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 330585546}
-  acceleration: 10
-  deceleration: 15
+  acceleration: 200
+  deceleration: 150
   maxSpeed: 20
-  turnSmoothTime: 0.1
+  turnSmoothTime: 2
 --- !u!114 &1802140292
 MonoBehaviour:
   m_ObjectHideFlags: 0

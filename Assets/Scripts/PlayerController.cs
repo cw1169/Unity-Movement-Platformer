@@ -1,7 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem.Controls;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {   
@@ -13,15 +10,18 @@ public class PlayerController : MonoBehaviour
     public float deceleration = 15f;
     public float maxSpeed = 6f;
 
-    private float currentSpeed = 0f;
+    private Vector3 horizontalVelocity;
+    private float verticalVelocity = 0f;
+
     public float turnSmoothTime = 0.1f;
 
-    float turnSmoothVelocity;
     private CharacterController controller;
-    
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        if (cam == null)
+            Debug.LogError("Camera Transform 'cam' is not assigned! Please assign it in Inspector.");
     }
 
     void Update()
@@ -29,40 +29,41 @@ public class PlayerController : MonoBehaviour
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
-        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
+        Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
 
-        if (direction.magnitude >= 0.1f)
-        {
-            currentSpeed = Mathf.Min(currentSpeed + acceleration * Time.deltaTime, maxSpeed);
-        }
-        else
-        {
-            currentSpeed = Mathf.Max(currentSpeed - deceleration * Time.deltaTime, 0f);
-        }
-
-
-        if (direction.magnitude >= 0.1f)
-        {
-            // Movement direction relative to camera
-            Vector3 moveDirection = cam.forward * direction.z + cam.right * direction.x;
-            moveDirection.y = 0f;
-            moveDirection.Normalize();
-
-            // Move only
-            controller.Move(moveDirection * currentSpeed * Time.deltaTime);
-        }
-
-
-        // Always rotate player to face same direction as camera
+        // Camera relative directions (flattened)
         Vector3 camForward = cam.forward;
         camForward.y = 0f;
+        camForward.Normalize();
 
+        Vector3 camRight = cam.right;
+        camRight.y = 0f;
+        camRight.Normalize();
+
+        Vector3 targetMoveDirection = camForward * inputDirection.z + camRight * inputDirection.x;
+        targetMoveDirection.Normalize();
+
+        if (inputDirection.magnitude >= 0.1f)
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetMoveDirection * maxSpeed, acceleration * Time.deltaTime);
+        else
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, deceleration * Time.deltaTime);
+
+        // Gravity
+        if (controller.isGrounded)
+            verticalVelocity = -2f; // Small downward force to stick to ground
+        else
+            verticalVelocity += Physics.gravity.y * Time.deltaTime;
+
+        Vector3 finalVelocity = horizontalVelocity + Vector3.up * verticalVelocity;
+
+        controller.Move(finalVelocity * Time.deltaTime);
+
+        // Rotate player to face camera forward smoothly
         if (camForward.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(camForward);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f); // smooth
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSmoothTime * 10f * Time.deltaTime);
         }
-
     }
 
     public Vector3 GetVelocity()
