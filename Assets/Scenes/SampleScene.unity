@@ -1335,7 +1335,7 @@ MonoBehaviour:
   maxSpeed: 20
   turnSmoothTime: 2
   gravityValue: -9.81
-  jumpSpeed: 0
+  jumpVelocity: 30
 --- !u!114 &1802140292
 MonoBehaviour:
   m_ObjectHideFlags: 0

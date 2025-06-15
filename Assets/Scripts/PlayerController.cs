@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -14,13 +15,15 @@ public class PlayerController : MonoBehaviour
     public float deceleration = 150f;
     public float maxSpeed = 20f;
     public float turnSmoothTime = 2f;
-    public float gravityValue = -30f;
+    public float gravityValue = -9.81f;
+    public float jumpVelocity = 30f;
+
 
     private InputAction move, jump; //declare input actions
     private Vector3 horizontalVelocity;
-    private float jumpVelocity = 0f;
+    private Vector3 verticalVelocity;
     private CharacterController controller;
-    private bool isGrounded;
+    private bool isGrounded, jumping;
 
 
     private void Awake()
@@ -80,8 +83,6 @@ public class PlayerController : MonoBehaviour
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, deceleration * Time.deltaTime);
         }
 
-        Vector3 finalVelocity = horizontalVelocity + Vector3.up * jumpVelocity;
-        controller.Move(finalVelocity * Time.deltaTime);
 
         // Rotate player to face camera forward smoothly
         if (camForward.sqrMagnitude > 0.01f)
@@ -90,16 +91,29 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSmoothTime * 10f * Time.deltaTime);
         }
 
-        //Jump Code
         isGrounded = IsGrounded();
-        if (jump.triggered && isGrounded)
-        {           
-            jumpVelocity = 10f;
-        }
-        else
+        //Jump Code
+        if (isGrounded && verticalVelocity.y < 0) // Reset vertical velocity if grounded and moving downwards
         {
-            jumpVelocity += gravityValue * Time.deltaTime;
+            verticalVelocity.y = -2f; // Small downward force to ensure it sticks to the ground
         }
+
+        if (jump.triggered && isGrounded)
+        {
+            // Calculate jump velocity based on desired jump height and gravity
+            // v = sqrt(2gh)
+            verticalVelocity.y = Mathf.Sqrt(jumpVelocity * -2f * gravityValue);
+        }
+        if (!isGrounded)
+        {
+            // fall at quadratic rate
+            verticalVelocity.y += gravityValue* - gravityValue * Time.deltaTime;
+        }
+
+
+        Vector3 finalVelocity = horizontalVelocity + verticalVelocity;
+        controller.Move(finalVelocity * Time.deltaTime);
+
     }
 
 
