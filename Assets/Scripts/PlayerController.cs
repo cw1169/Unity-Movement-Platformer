@@ -63,6 +63,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        Cursor.visible = false;
         controller = GetComponent<CharacterController>();
         if (cam == null)
             Debug.LogError("Camera Transform 'cam' is not assigned! Please assign it in Inspector.");
