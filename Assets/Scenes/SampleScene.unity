@@ -1332,10 +1332,12 @@ MonoBehaviour:
   cam: {fileID: 330585546}
   acceleration: 200
   deceleration: 150
-  maxSpeed: 20
+  walkSpeed: 20
+  sprintSpeed: 50
   turnSmoothTime: 2
   gravityValue: -9.81
   jumpVelocity: 30
+  state: 0
 --- !u!114 &1802140292
 MonoBehaviour:
   m_ObjectHideFlags: 0
