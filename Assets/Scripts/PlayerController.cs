@@ -18,10 +18,11 @@ public class PlayerController : MonoBehaviour
     public float turnSmoothTime;
     public float gravityValue;
     public float jumpVelocity;
+    public Animator playerAnimation;
     public enum MovementState
     {
         walking,
-        sprinting, 
+        sprinting,
         air
     }
 
@@ -118,6 +119,10 @@ public class PlayerController : MonoBehaviour
 
         Vector3 finalVelocity = horizontalVelocity + verticalVelocity;
         controller.Move(finalVelocity * Time.deltaTime);
+
+        if (state == MovementState.sprinting) {
+            playerAnimation.SetBool("isRunning", true);
+        }
 
     }
 
