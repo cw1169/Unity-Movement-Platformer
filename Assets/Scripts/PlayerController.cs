@@ -96,6 +96,8 @@ public class PlayerController : MonoBehaviour
         if (inputDirection.magnitude >= 0.1f)
         {
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetMoveDirection * moveSpeed, acceleration * Time.deltaTime);
+            Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSmoothTime * 10f * Time.deltaTime);
         }
 
         else
@@ -104,11 +106,11 @@ public class PlayerController : MonoBehaviour
         }
 
         // Rotate player to face camera forward smoothly
-        if (camForward.sqrMagnitude > 0.01f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(camForward);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSmoothTime * 10f * Time.deltaTime);
-        }
+        // if (camForward.sqrMagnitude > 0.01f)
+        // {
+        //     Quaternion targetRotation = Quaternion.LookRotation(camForward);
+        //     transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSmoothTime * 10f * Time.deltaTime);
+        // }
 
         // jump and double jump logic
         verticalVelocity.y = Jump();
